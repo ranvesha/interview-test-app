@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.http.HttpVersion;
 import org.apache.http.client.fluent.Request;
@@ -127,5 +128,21 @@ public class ChplApiWrapper {
 	public List<String> getPracticeTypeNames() {
 		//TODO: implement this mehtod!
 		return new ArrayList<String>();
+	}
+	
+	/**
+	 * Which education levels did test participants have for listings
+	 * with a 2015 certification edition and certified between March 1, 2017 and 
+	 * March 31, 2017?
+	 * HINT: Get listings matching the description above using our search API.
+	 * The summary data sent back from the search API will not have test participants
+	 * but the details API will give that information. 
+	 * In the details of a given listing, test participants are nested under each 
+	 * certificationResult -> testTasks -> testParticipants and not all certificationResults
+	 * will have them so you may have to dig a bit to find them.
+	 */
+	public Set<String> getEducationLevelsForSpecificListings() {
+		//TODO: implement this method!
+		return null;
 	}
 }

@@ -52,5 +52,11 @@ A few of our unit tests have found bugs or incomplete code and are failing. You 
 	
 You'll need to update ChplApiWrapper.java in such a way that all of the failing unit tests pass. The existing failing unit tests *should not* need to be changed, and they should all pass once your ChplApiWrapper updates are complete. Feel free to add other unit tests or make any changes you feel would improve this code.
 
+#### Extra Credit
+
+There are some less-than best practices in the ChplApiWrapper. For example, we are using System.out.println instead of a proper logging framework. Convert our logging statements to use a logging framework of your choice. Feel free to add or remove log statements. Ideally, the logger will be set up to log to the console and to a file that rolls over daily. 
+
+#### Conclusion
+
 Commit and push whatever code you've written to your Github fork of this project. Be prepared to discuss your solution. Did you notice the use of a design pattern in ChplApiWrapper?
 

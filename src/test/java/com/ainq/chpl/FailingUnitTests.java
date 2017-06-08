@@ -3,6 +3,7 @@ package com.ainq.chpl;
 import static org.junit.Assert.*;
 
 import java.util.List;
+import java.util.Set;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -68,5 +69,32 @@ public class FailingUnitTests {
 		}
 		assertTrue(foundAmbulatory);
 		assertTrue(foundInpatient);
+	}
+	
+	@Test
+	public void testGetEducationLevelsForSpecificListings() {
+		Set<String> educationLevels = api.getEducationLevelsForSpecificListings();
+		assertEquals(4, educationLevels.size());
+		
+		boolean foundBachelors = false, foundDoctorate = false, foundAssociate = false, foundMasters = false;
+		for(String educationLevel : educationLevels) {
+			switch(educationLevel) {
+			case "Bachelor's degree":
+				foundBachelors = true;
+				break;
+			case "Doctorate degree (e.g., MD, DNP, DMD, PhD)":
+				foundDoctorate = true;
+				break;
+			case "Associate degree":
+				foundAssociate = true;
+				break;
+			case "Master's degree":
+				foundMasters = true;
+				break;
+			default:
+				fail("Unexpected education level found: " + educationLevel);
+			}
+		}
+		assertTrue(foundBachelors && foundDoctorate && foundAssociate && foundMasters);
 	}
 }
