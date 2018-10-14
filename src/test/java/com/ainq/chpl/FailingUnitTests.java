@@ -2,15 +2,17 @@ package com.ainq.chpl;
 
 import static org.junit.Assert.*;
 
-import java.util.List;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
+import java.lang.reflect.Field;
 
+import org.json.JSONException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class FailingUnitTests {
 	private static ChplApiWrapper api;
-	
+
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		api = ChplApiWrapper.getInstance();
@@ -24,6 +26,25 @@ public class FailingUnitTests {
 	public void testChplStatusIsOk() {
 		String apiStatus = api.getChplStatus();
 		assertEquals("OK", apiStatus);
+	}
+
+	/**
+	 * Get the CHPL application status from the API Wrapper.
+	 * The value expected to be returned from the API Wrapper is "OK".
+	 */
+	@Test
+	public void testChplStatusForErrorMessage() {
+		// prepare
+		Map<String, String> endpoints = api.getEndpoints();
+		String origValue = endpoints.get(ChplApiWrapper.STATUS_ENDPOINT);
+		endpoints.put(ChplApiWrapper.STATUS_ENDPOINT, "https://chpl.ahrqstg.org/rest1/status");
+
+		// execute
+		String apiStatus = api.getChplStatus();
+		assertEquals("Not Found", apiStatus);
+
+		// reset
+		endpoints.put(ChplApiWrapper.STATUS_ENDPOINT, origValue);
 	}
 	
 	/**
@@ -72,7 +93,7 @@ public class FailingUnitTests {
 	}
 	
 	@Test
-	public void testGetEducationLevelsForSpecificListings() {
+	public void testGetEducationLevelsForSpecificListings() throws IOException, JSONException{
 		Set<String> educationLevels = api.getEducationLevelsForSpecificListings();
 		assertEquals(4, educationLevels.size());
 		
