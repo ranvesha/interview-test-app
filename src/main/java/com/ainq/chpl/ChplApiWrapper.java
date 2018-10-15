@@ -179,40 +179,68 @@ public class ChplApiWrapper {
 	 */
 	public Set<String> getEducationLevelsForSpecificListings() throws IOException, JSONException{
 		Set<String> educationTypeNames = new HashSet<>();
-		String url = properties.getProperty(CHPL_API_URL_BEGIN_PROPERTY) +
-				properties.getProperty(SEARCH_ENDPOINT);
-		String searchResult = sendRequest(url);
-		if(searchResult != null){
-			JSONObject search = new JSONObject(searchResult);
-			JSONArray searchArr = search.getJSONArray("results");
-			for (Integer i = 0; i < searchArr.length(); i++) {
-				if(searchArr.optJSONObject(i).has("product")){
-					String productId = searchArr.optJSONObject(i).get("id").toString();
-					String detailsUrl = properties.getProperty(CHPL_API_URL_BEGIN_PROPERTY)
-							+ String.format(properties.getProperty(DETAILS_ENDPOINT), productId);
-					String result = sendRequest(detailsUrl);
-					JSONObject detailsObj = new JSONObject(result);
-					JSONObject sedObj  = detailsObj.getJSONObject("sed");
-					JSONArray testTasksArray = sedObj.getJSONArray("testTasks");
-					for (Integer j = 0; j < testTasksArray.length(); j++) {
-						if(testTasksArray.optJSONObject(j).has("testParticipants")) {
+		String educationLevelForSpecificListingEndpoint = endpoints.get(SEARCH_ENDPOINT);
+		try {
+			String searchResult = sendRequest(educationLevelForSpecificListingEndpoint);
+			if (searchResult != null) {
+				JSONObject search = new JSONObject(searchResult);
+				JSONArray searchArr = search.getJSONArray("results");
+				for (Integer i = 0; i < searchArr.length(); i++) {
+					if (searchArr.optJSONObject(i).has("product")) {
+						String productId = searchArr.optJSONObject(i).get("id").toString();
+						getEducationTypeDetails(productId, educationTypeNames);
+					}
+				}
+			}
+		}catch (IOException e){
+			LOGGER.error("Failed to make call to {}", educationLevelForSpecificListingEndpoint);
+			LOGGER.error("Please check that the {} and searchApi properties are configured correctly in {}",
+					CHPL_API_URL_BEGIN_PROPERTY, PROPERTIES_FILE_NAME);
+		}
+		return educationTypeNames;
+	}
 
-							JSONArray testParticipantsArray = testTasksArray.optJSONObject(j).getJSONArray("testParticipants");
-							for (Integer k = 0; k < testParticipantsArray.length(); k++) {
-								educationTypeNames.add(testParticipantsArray.optJSONObject(k).get("educationTypeName").toString());
-							}
+	/**
+	 * Get the details of each Listing
+	 * @param productId
+	 * @param educationTypeNames
+	 * @throws IOException
+	 * @throws JSONException
+	 */
+	private void getEducationTypeDetails(String productId, Set<String> educationTypeNames) throws IOException, JSONException{
+		String detailsUrl = String.format(endpoints.get(DETAILS_ENDPOINT), productId);
+		String result = sendRequest(detailsUrl);
+		JSONObject detailsObj = new JSONObject(result);
+		if (detailsObj.has("sed")) {
+			JSONObject sedObj = detailsObj.getJSONObject("sed");
+			if (sedObj.has("testTasks")) {
+				JSONArray testTasksArray = sedObj.getJSONArray("testTasks");
+				for (Integer j = 0; j < testTasksArray.length(); j++) {
+					if (testTasksArray.optJSONObject(j).has("testParticipants")) {
+						JSONArray testParticipantsArray = testTasksArray.optJSONObject(j).getJSONArray("testParticipants");
+						for (Integer k = 0; k < testParticipantsArray.length(); k++) {
+							educationTypeNames.add(testParticipantsArray.optJSONObject(k).get("educationTypeName").toString());
 						}
 					}
 				}
 			}
 		}
-		return educationTypeNames;
 	}
 
+	/**
+	 * Method to get the Endpoints
+	 * @return endpoint URLs
+	 */
 	public Map<String, String> getEndpoints() {
 		return this.endpoints;
 	}
 
+	/**
+	 * Makes the HTTP call to the Endpoints
+	 * @param serviceUrl
+	 * @return HTTP response as String
+	 * @throws IOException
+	 */
 	private String sendRequest(String serviceUrl) throws IOException{
 		String jsonResponse = null;
 		jsonResponse =  Request.Get(serviceUrl)
@@ -256,5 +284,12 @@ public class ChplApiWrapper {
 		endpoints.put(PRACTICE_TYPE_NAMES_ENDPOINT, String.format("%s%s",
 				this.properties.getProperty(CHPL_API_URL_BEGIN_PROPERTY)
 				,  this.properties.getProperty("practiceTypeNamesApi")));
+
+		endpoints.put(SEARCH_ENDPOINT, String.format("%s%s",
+				this.properties.getProperty(CHPL_API_URL_BEGIN_PROPERTY)
+				,  this.properties.getProperty("searchApi")));
+		endpoints.put(DETAILS_ENDPOINT, String.format("%s%s",
+				this.properties.getProperty(CHPL_API_URL_BEGIN_PROPERTY)
+				,  this.properties.getProperty("detailsApi")));
 	}
 }
